@@ -11,6 +11,7 @@
 using namespace std::chrono_literals;
 
 #define NUM_EVAL 10+1
+#define EVAL_INTERVAL 1000ms
 
 class Publisher : public rclcpp::Node
 {
@@ -19,7 +20,7 @@ public:
     : Node("pub_mros2"), count_(0)
   {
     publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("to_stm", 10);
-    timer_ = this->create_wall_timer(1000ms, std::bind(&Publisher::timer_callback, this));
+    timer_ = this->create_wall_timer(EVAL_INTERVAL, std::bind(&Publisher::timer_callback, this));
   }
 
 private:
