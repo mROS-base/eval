@@ -10,8 +10,8 @@
 
 using namespace std::chrono_literals;
 
-#define NUM_EVAL 10+1
-#define EVAL_INTERVAL 1000ms
+#define NUM_EVAL 1000+1
+#define EVAL_INTERVAL 100ms
 #define LEN_STR   1
 
 class Random_Msg
