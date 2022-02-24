@@ -3,14 +3,34 @@
 #include <memory>
 #include <string>
 #include <fstream>
+#include <random>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 
 using namespace std::chrono_literals;
 
-/* This example creates a subclass of Node and uses std::bind() to register a
-* member function as a callback from the timer. */
+#define NUM_EVAL 10
+#define LEN_STR   1
+
+class Test_String
+{
+public:
+  static std::string get_random(const int len)
+  {
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    srand(time(NULL));
+    std::string random_string;
+    for (int i = 0; i < len; ++i)
+    {
+      random_string += alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+    return random_string;
+  }
+};
 
 class Publisher : public rclcpp::Node
 {
@@ -23,27 +43,39 @@ public:
   }
 
 private:
-  std::array<rclcpp::Time, 201> publogs;
+  std::array<std::string, NUM_EVAL> publogs;
+  std::array<rclcpp::Time, NUM_EVAL> timelogs;
   void timer_callback()
   {
-    if(count_ < 201){
+    if (count_ < NUM_EVAL)
+    {
       auto message = std_msgs::msg::String();
-      message.data = "!";
-      publogs[count_] = this->get_clock()->now();
+      message.data = Test_String::get_random(LEN_STR);
+      publogs[count_] = message.data;
+
+      /* eval point start */
+      timelogs[count_] = this->get_clock()->now();
       publisher_->publish(message);
-    } else if (count_ == 201){
+
+      count_++;
+    }
+    else
+    {
       std::ofstream writing_file;
-      std::string filename = "string_publog.txt";
+      std::string filename = "../results/string" + std::to_string(LEN_STR) + "_publog.txt";
       writing_file.open(filename, std::ios::out);
-      for (int i=0; i<200; i++){
-        const std::string writing_text = std::to_string(publogs[i].nanoseconds());
+      for (int i = 0; i < NUM_EVAL; i++)
+      {
+        const std::string writing_text = publogs[i] + ":" + std::to_string(timelogs[i].nanoseconds());
         writing_file << writing_text << std::endl;
       }
+      RCLCPP_INFO(this->get_logger(), "eval on pub completed");
+      rclcpp::shutdown();
     }
   }
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
-  size_t count_;
+  uint16_t count_;
 };
 
 int main(int argc, char * argv[])

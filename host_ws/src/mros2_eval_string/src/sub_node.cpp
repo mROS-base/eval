@@ -9,36 +9,45 @@
 
 using std::placeholders::_1;
 
+#define NUM_EVAL 10
+#define LEN_STR   1
+
 class Subscriber : public rclcpp::Node
 {
 public:
-  uint32_t count_ = 0;
-  Subscriber() : Node("mros2_sub")
+  Subscriber()
+    : Node("mros2_sub"), count_(0)
   {
     subscriber_ = this->create_subscription<std_msgs::msg::String>("to_linux", rclcpp::QoS(10).best_effort(), std::bind(&Subscriber::topic_callback, this, _1));
   }
 
 private:
-  std::array<rclcpp::Time, 200> sublogs;
-  void topic_callback(const std_msgs::msg::String::SharedPtr msg) const
+  std::array<std::string, NUM_EVAL> sublogs;
+  std::array<rclcpp::Time, NUM_EVAL> timelogs;
+  void topic_callback(const std_msgs::msg::String::SharedPtr message)
   {
-    rclcpp::Time now = this->get_clock()->now();
-    if (count_ < 200){
-      sublogs[count_] = now;
-      auto subscribed_message = std_msgs::msg::String();
-      subscribed_message = *msg;
-      count_++;
-    } else {
+    /* eval point end */
+    timelogs[count_] = this->get_clock()->now();
+
+    sublogs[count_] = message->data;
+    count_++;
+
+    if (count_ >= NUM_EVAL)
+    {
       std::ofstream writing_file;
-      std::string filename = "string_sublog.txt";
+      std::string filename = "../results/string" + std::to_string(LEN_STR) + "_sublog.txt";
       writing_file.open(filename, std::ios::out);
-      for (int i=0; i<200; i++){
-        const std::string writing_text = std::to_string(sublogs[i].nanoseconds());
+      for (int i = 0; i < NUM_EVAL; i++)
+      {
+        const std::string writing_text = sublogs[i] + ":" + std::to_string(timelogs[i].nanoseconds());
         writing_file << writing_text << std::endl;
       }
+      RCLCPP_INFO(this->get_logger(), "eval on sub completed");
+      rclcpp::shutdown();
     }
   }
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscriber_;
+  uint16_t count_;
 };
 
 
