@@ -13,7 +13,7 @@ using namespace std::chrono_literals;
 #define NUM_EVAL 10+1
 #define LEN_STR   1
 
-class Test_String
+class Random_Msg
 {
 public:
   static std::string get_random(const int len)
@@ -50,7 +50,7 @@ private:
     if (count_ < NUM_EVAL)
     {
       auto message = std_msgs::msg::String();
-      message.data = Test_String::get_random(LEN_STR);
+      message.data = Random_Msg::get_random(LEN_STR);
       publogs[count_] = message.data;
 
       /* eval point start */

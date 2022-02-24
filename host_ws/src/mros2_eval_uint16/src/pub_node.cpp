@@ -2,14 +2,15 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <fstream>
+#include <random>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/u_int16.hpp"
 
 using namespace std::chrono_literals;
 
-/* This example creates a subclass of Node and uses std::bind() to register a
-* member function as a callback from the timer. */
+#define NUM_EVAL 10+1
 
 class Publisher : public rclcpp::Node
 {
@@ -22,12 +23,36 @@ public:
   }
 
 private:
+  std::array<std::uint16_t, NUM_EVAL> publogs;
+  std::array<rclcpp::Time, NUM_EVAL> timelogs;
   void timer_callback()
   {
-    auto message = std_msgs::msg::UInt16();
-    message.data = count_++;
-    RCLCPP_INFO(this->get_logger(), "Publishing msg: %u", message.data);
-    publisher_->publish(message);
+    if (count_ < NUM_EVAL)
+    {
+      auto message = std_msgs::msg::UInt16();
+      std::srand(std::time(nullptr));
+      message.data = rand() % 128;
+      publogs[count_] = message.data;
+
+      /* eval point start */
+      timelogs[count_] = this->get_clock()->now();
+      publisher_->publish(message);
+
+      count_++;
+    }
+    else
+    {
+      std::ofstream writing_file;
+      std::string filename = "../results/uint16_publog.csv";
+      writing_file.open(filename, std::ios::out);
+      for (int i = 0; i < NUM_EVAL; i++)
+      {
+        const std::string writing_text = std::to_string(publogs[i]) + "," + std::to_string(timelogs[i].nanoseconds());
+        writing_file << writing_text << std::endl;
+      }
+      RCLCPP_INFO(this->get_logger(), "eval on pub completed");
+      rclcpp::shutdown();
+    }
   }
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<std_msgs::msg::UInt16>::SharedPtr publisher_;

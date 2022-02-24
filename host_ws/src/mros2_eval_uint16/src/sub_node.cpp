@@ -2,26 +2,51 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <fstream>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/u_int16.hpp"
 
 using std::placeholders::_1;
 
+#define NUM_EVAL 10
+
 class Subscriber : public rclcpp::Node
 {
 public:
-  Subscriber() : Node("mros2_sub")
+  Subscriber()
+    : Node("mros2_sub"), count_(0)
   {
     subscriber_ = this->create_subscription<std_msgs::msg::UInt16>("to_linux", rclcpp::QoS(10).best_effort(), std::bind(&Subscriber::topic_callback, this, _1));
   }
 
 private:
-  void topic_callback(const std_msgs::msg::UInt16::SharedPtr msg) const
+  std::array<std::uint16_t, NUM_EVAL> sublogs;
+  std::array<rclcpp::Time, NUM_EVAL> timelogs;
+  void topic_callback(const std_msgs::msg::UInt16::SharedPtr message)
   {
-    RCLCPP_INFO(this->get_logger(), "Subscribed msg: %u", msg->data);
+    /* eval point end */
+    timelogs[count_] = this->get_clock()->now();
+
+    sublogs[count_] = message->data;
+    count_++;
+
+    if (count_ >= NUM_EVAL)
+    {
+      std::ofstream writing_file;
+      std::string filename = "../results/uint16_sublog.csv";
+      writing_file.open(filename, std::ios::out);
+      for (int i = 0; i < NUM_EVAL; i++)
+      {
+        const std::string writing_text = std::to_string(sublogs[i]) + "," + std::to_string(timelogs[i].nanoseconds());
+        writing_file << writing_text << std::endl;
+      }
+      RCLCPP_INFO(this->get_logger(), "eval on sub completed");
+      rclcpp::shutdown();
+    }
   }
   rclcpp::Subscription<std_msgs::msg::UInt16>::SharedPtr subscriber_;
+  uint16_t count_;
 };
 
 
