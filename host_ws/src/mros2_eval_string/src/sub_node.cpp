@@ -9,7 +9,7 @@
 
 using std::placeholders::_1;
 
-#define NUM_EVAL 10
+#define NUM_EVAL 1000
 #define LEN_STR   1
 
 class Subscriber : public rclcpp::Node
