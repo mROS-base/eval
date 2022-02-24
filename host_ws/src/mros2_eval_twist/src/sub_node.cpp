@@ -9,35 +9,44 @@
 
 using std::placeholders::_1;
 
+#define NUM_EVAL 10
+
 class Subscriber : public rclcpp::Node
 {
 public:
-  uint32_t count_ = 0;
-  Subscriber() : Node("mros2_sub")
+  Subscriber()
+    : Node("mros2_sub"), count_(0)
   {
     subscriber_ = this->create_subscription<geometry_msgs::msg::Twist>("to_linux", rclcpp::QoS(10).best_effort(), std::bind(&Subscriber::topic_callback, this, _1));
   }
 
 private:
-  std::array<rclcpp::Time, 200> sublogs;
+  std::array<float, NUM_EVAL> sublogs;
+  std::array<rclcpp::Time, NUM_EVAL> timelogs;
   void topic_callback(const geometry_msgs::msg::Twist::SharedPtr message)
   {
-    if (count_ < 200){
-      auto subscribed_message = geometry_msgs::msg::Twist();
-      subscribed_message = *message;
-      sublogs[count_] = this->get_clock()->now();
-      count_++;
-    } else {
+    /* eval point end */
+    timelogs[count_] = this->get_clock()->now();
+
+    sublogs[count_] = message->linear.x;
+    count_++;
+
+    if (count_ >= NUM_EVAL)
+    {
       std::ofstream writing_file;
-      std::string filename = "twist_sublog.txt";
+      std::string filename = "../results/twist_sublog.csv";
       writing_file.open(filename, std::ios::out);
-      for (int i=0; i<200; i++){
-        const std::string writing_text = std::to_string(sublogs[i].nanoseconds());
+      for (int i = 0; i < NUM_EVAL; i++)
+      {
+        const std::string writing_text = std::to_string(sublogs[i]) + "," + std::to_string(timelogs[i].nanoseconds());
         writing_file << writing_text << std::endl;
       }
+      RCLCPP_INFO(this->get_logger(), "eval on sub completed");
+      rclcpp::shutdown();
     }
   }
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscriber_;
+  uint16_t count_;
 };
 
 
