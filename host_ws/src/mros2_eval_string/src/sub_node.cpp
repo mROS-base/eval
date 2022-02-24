@@ -39,7 +39,7 @@ private:
       writing_file.open(filename, std::ios::out);
       for (int i = 0; i < NUM_EVAL; i++)
       {
-        const std::string writing_text = sublogs[i] + "\t" + std::to_string(timelogs[i].nanoseconds());
+        const std::string writing_text = sublogs[i] + "," + std::to_string(timelogs[i].nanoseconds());
         writing_file << writing_text << std::endl;
       }
       RCLCPP_INFO(this->get_logger(), "eval on sub completed");

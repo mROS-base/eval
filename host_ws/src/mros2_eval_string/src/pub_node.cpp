@@ -10,7 +10,7 @@
 
 using namespace std::chrono_literals;
 
-#define NUM_EVAL 10
+#define NUM_EVAL 10+1
 #define LEN_STR   1
 
 class Test_String
@@ -66,7 +66,7 @@ private:
       writing_file.open(filename, std::ios::out);
       for (int i = 0; i < NUM_EVAL; i++)
       {
-        const std::string writing_text = publogs[i] + "\t" + std::to_string(timelogs[i].nanoseconds());
+        const std::string writing_text = publogs[i] + "," + std::to_string(timelogs[i].nanoseconds());
         writing_file << writing_text << std::endl;
       }
       RCLCPP_INFO(this->get_logger(), "eval on pub completed");
