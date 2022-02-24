@@ -1,0 +1,8 @@
+[submodule "mros2-mbed"]
+	path = mros2-mbed
+	url = git@github.com:mROS-base/mros2-mbed
+	branch = eval/v0.3.1
+[submodule "mros2-asp3-f767zi"]
+	path = mros2-asp3-f767zi
+	url = git@github.com:mROS-base/mros2-asp3-f767zi
+	branch = eval/v0.3.1
