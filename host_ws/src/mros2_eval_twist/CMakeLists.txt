@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(mros2_echoback_twist_calc_time)
+project(mros2_eval_twist)
 
 
 # Default to C99
