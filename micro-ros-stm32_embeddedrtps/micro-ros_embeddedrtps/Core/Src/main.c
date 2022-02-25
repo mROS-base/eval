@@ -29,7 +29,7 @@
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 
-#include <geometry_msgs/msg/twist.h>
+#include <std_msgs/msg/u_int16.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -362,13 +362,13 @@ void * microros_zero_allocate(size_t number_of_elements, size_t size_of_element,
 rcl_publisher_t publisher;
 rcl_subscription_t subscriber;
 
-geometry_msgs__msg__Twist msg;
+std_msgs__msg__UInt16 msg;
 
 void subscription_callback(const void * msgin)
 {
-  //printf("sub\n");
+  //printf("sub\r\n");
 
-  const geometry_msgs__msg__Twist * msg = (const geometry_msgs__msg__Twist *)msgin;
+  const std_msgs__msg__UInt16 * msg = (const std_msgs__msg__UInt16 *)msgin;
 
   rcl_publish(&publisher, (const void*)msg, NULL);
 }
@@ -394,7 +394,7 @@ void StartDefaultTask(void *argument)
 	 printf("Error on default allocators (line %d)\n", __LINE__);
   }
 
-  printf("main start\n");
+  printf("main start\r\n");
 
   // micro-ROS app
 
@@ -414,14 +414,14 @@ void StartDefaultTask(void *argument)
   rclc_publisher_init_default(
     &publisher,
     &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt16),
     "to_linux");
 
   // create subscriber
   rclc_subscription_init_default(
     &subscriber,
     &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt16),
     "to_stm");
 
   // Create executor
@@ -444,7 +444,7 @@ void StartDefaultTask(void *argument)
 
   for(;;) {
 	rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
-    osDelay(1000);
+    osDelay(10);
   }
   /* USER CODE END 5 */
 }
