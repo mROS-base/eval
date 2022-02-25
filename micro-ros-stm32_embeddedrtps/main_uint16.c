@@ -366,7 +366,7 @@ std_msgs__msg__UInt16 msg;
 
 void subscription_callback(const void * msgin)
 {
-  printf("sub\n");
+  //printf("sub\n");
 
   const std_msgs__msg__UInt16 * msg = (const std_msgs__msg__UInt16 *)msgin;
 
@@ -394,7 +394,7 @@ void StartDefaultTask(void *argument)
 	 printf("Error on default allocators (line %d)\n", __LINE__);
   }
 
-  printf("main\n");
+  printf("main start\n");
 
   // micro-ROS app
 
@@ -444,7 +444,7 @@ void StartDefaultTask(void *argument)
 
   for(;;) {
 	rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
-    osDelay(portTICK_RATE_MS*1000);
+    osDelay(1000);
   }
   /* USER CODE END 5 */
 }
