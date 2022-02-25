@@ -366,7 +366,7 @@ std_msgs__msg__UInt16 msg;
 
 void subscription_callback(const void * msgin)
 {
-  //printf("sub\n");
+  printf("sub\n");
 
   const std_msgs__msg__UInt16 * msg = (const std_msgs__msg__UInt16 *)msgin;
 
@@ -394,7 +394,7 @@ void StartDefaultTask(void *argument)
 	 printf("Error on default allocators (line %d)\n", __LINE__);
   }
 
-  printf("main\r\n");
+  printf("main\n");
 
   // micro-ROS app
 
