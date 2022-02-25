@@ -13,12 +13,15 @@ using namespace std::chrono_literals;
 #define NUM_EVAL 1000+1
 #define EVAL_INTERVAL 100ms
 
+std::string platform;
+
 class Publisher : public rclcpp::Node
 {
 public:
   Publisher()
     : Node("pub_mros2"), count_(0)
   {
+    RCLCPP_INFO(this->get_logger(), "eval on pub start");
     publisher_ = this->create_publisher<std_msgs::msg::UInt16>("to_stm", 10);
     timer_ = this->create_wall_timer(EVAL_INTERVAL, std::bind(&Publisher::timer_callback, this));
   }
@@ -31,7 +34,6 @@ private:
     if (count_ < NUM_EVAL)
     {
       auto message = std_msgs::msg::UInt16();
-      std::srand(std::time(nullptr));
       message.data = rand() % 128;
       publogs[count_] = message.data;
 
@@ -44,8 +46,14 @@ private:
     else
     {
       std::ofstream writing_file;
-      std::string filename = "../results/uint16_publog.csv";
-      writing_file.open(filename, std::ios::out);
+      std::string filename = "uint16_pub.csv";
+      std::string filepath = "../results/" + platform + "/" + filename;
+      writing_file.open(filepath, std::ios::out);
+      if (!writing_file)
+      {
+        RCLCPP_ERROR(this->get_logger(), "writing file not found!!");
+        rclcpp::shutdown();
+      }
       for (int i = 0; i < NUM_EVAL; i++)
       {
         const std::string writing_text = std::to_string(publogs[i]) + "," + std::to_string(timelogs[i].nanoseconds());
@@ -62,6 +70,14 @@ private:
 
 int main(int argc, char * argv[])
 {
+  if (argc != 2)
+  {
+    std::cout << "arguments error: " << argc << std::endl;
+    return 1;
+  }
+  platform = argv[1];
+  srand(time(NULL));
+
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<Publisher>());
   rclcpp::shutdown();

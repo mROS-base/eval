@@ -12,7 +12,9 @@ using namespace std::chrono_literals;
 
 #define NUM_EVAL 1000+1
 #define EVAL_INTERVAL 100ms
-#define LEN_STR   1
+
+std::string platform;
+int len_str;
 
 class Random_Msg
 {
@@ -23,7 +25,6 @@ public:
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
-    srand(time(NULL));
     std::string random_string;
     for (int i = 0; i < len; ++i)
     {
@@ -39,6 +40,7 @@ public:
   Publisher()
     : Node("pub_mros2"), count_(0)
   {
+    RCLCPP_INFO(this->get_logger(), "eval on pub start");
     publisher_ = this->create_publisher<std_msgs::msg::String>("to_stm", 10);
     timer_ = this->create_wall_timer(EVAL_INTERVAL, std::bind(&Publisher::timer_callback, this));
   }
@@ -51,7 +53,7 @@ private:
     if (count_ < NUM_EVAL)
     {
       auto message = std_msgs::msg::String();
-      message.data = Random_Msg::get_random(LEN_STR);
+      message.data = Random_Msg::get_random(len_str);
       publogs[count_] = message.data;
 
       /* eval point start */
@@ -63,8 +65,14 @@ private:
     else
     {
       std::ofstream writing_file;
-      std::string filename = "../results/string" + std::to_string(LEN_STR) + "_publog.csv";
-      writing_file.open(filename, std::ios::out);
+      std::string filename = "string" + std::to_string(len_str) + "_pub.csv";
+      std::string filepath = "../results/" + platform + "/" + filename;
+      writing_file.open(filepath, std::ios::out);
+      if (!writing_file)
+      {
+        RCLCPP_ERROR(this->get_logger(), "writing file not found!!");
+        rclcpp::shutdown();
+      }
       for (int i = 0; i < NUM_EVAL; i++)
       {
         const std::string writing_text = publogs[i] + "," + std::to_string(timelogs[i].nanoseconds());
@@ -81,6 +89,15 @@ private:
 
 int main(int argc, char * argv[])
 {
+  if (argc != 3)
+  {
+    std::cout << "arguments error: " << argc << std::endl;
+    return 1;
+  }
+  platform = argv[1];
+  len_str = atoi(argv[2]);
+  srand(time(NULL));
+
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<Publisher>());
   rclcpp::shutdown();

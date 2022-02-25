@@ -10,7 +10,9 @@
 using std::placeholders::_1;
 
 #define NUM_EVAL 1000
-#define LEN_STR   1
+
+std::string platform;
+int len_str;
 
 class Subscriber : public rclcpp::Node
 {
@@ -18,6 +20,7 @@ public:
   Subscriber()
     : Node("mros2_sub"), count_(0)
   {
+    RCLCPP_INFO(this->get_logger(), "eval on sub start");
     subscriber_ = this->create_subscription<std_msgs::msg::String>("to_linux", rclcpp::QoS(10).best_effort(), std::bind(&Subscriber::topic_callback, this, _1));
   }
 
@@ -35,8 +38,14 @@ private:
     if (count_ >= NUM_EVAL)
     {
       std::ofstream writing_file;
-      std::string filename = "../results/string" + std::to_string(LEN_STR) + "_sublog.csv";
-      writing_file.open(filename, std::ios::out);
+      std::string filename = "string" + std::to_string(len_str) + "_sub.csv";
+      std::string filepath = "../results/" + platform + "/" + filename;
+      writing_file.open(filepath, std::ios::out);
+      if (!writing_file)
+      {
+        RCLCPP_ERROR(this->get_logger(), "writing file not found!!");
+        rclcpp::shutdown();
+      }
       for (int i = 0; i < NUM_EVAL; i++)
       {
         const std::string writing_text = sublogs[i] + "," + std::to_string(timelogs[i].nanoseconds());
@@ -53,6 +62,14 @@ private:
 
 int main(int argc, char *argv[])
 {
+  if (argc != 3)
+  {
+    std::cout << "arguments error: " << argc << std::endl;
+    return 1;
+  }
+  platform = argv[1];
+  len_str = atoi(argv[2]);
+
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<Subscriber>());
   rclcpp::shutdown();

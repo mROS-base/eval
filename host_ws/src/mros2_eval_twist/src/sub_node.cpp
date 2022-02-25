@@ -11,12 +11,15 @@ using std::placeholders::_1;
 
 #define NUM_EVAL 1000
 
+std::string platform;
+
 class Subscriber : public rclcpp::Node
 {
 public:
   Subscriber()
     : Node("mros2_sub"), count_(0)
   {
+    RCLCPP_INFO(this->get_logger(), "eval on sub start");
     subscriber_ = this->create_subscription<geometry_msgs::msg::Twist>("to_linux", rclcpp::QoS(10).best_effort(), std::bind(&Subscriber::topic_callback, this, _1));
   }
 
@@ -34,7 +37,14 @@ private:
     if (count_ >= NUM_EVAL)
     {
       std::ofstream writing_file;
-      std::string filename = "../results/twist_sublog.csv";
+      std::string filename = "twist_sub.csv";
+      std::string filepath = "../results/" + platform + "/" + filename;
+      writing_file.open(filepath, std::ios::out);
+      if (!writing_file)
+      {
+        RCLCPP_ERROR(this->get_logger(), "writing file not found!!");
+        rclcpp::shutdown();
+      }
       writing_file.open(filename, std::ios::out);
       for (int i = 0; i < NUM_EVAL; i++)
       {
@@ -52,6 +62,13 @@ private:
 
 int main(int argc, char *argv[])
 {
+  if (argc != 2)
+  {
+    std::cout << "arguments error: " << argc << std::endl;
+    return 1;
+  }
+  platform = argv[1];
+
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<Subscriber>());
   rclcpp::shutdown();
