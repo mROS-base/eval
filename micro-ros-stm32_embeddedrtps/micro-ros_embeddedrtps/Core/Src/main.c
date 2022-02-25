@@ -24,7 +24,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <rcl/rcl.h>
+#include <rcl/error_handling.h>
+#include <rclc/rclc.h>
+#include <rclc/executor.h>
 
+#include <std_msgs/msg/int32.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -352,10 +357,57 @@ void StartDefaultTask(void *argument)
   /* init code for LWIP */
   MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
+  rcl_allocator_t freeRTOS_allocator = rcutils_get_zero_initialized_allocator();
+  freeRTOS_allocator.allocate = microros_allocate;
+  freeRTOS_allocator.deallocate = microros_deallocate;
+  freeRTOS_allocator.reallocate = microros_reallocate;
+  freeRTOS_allocator.zero_allocate =  microros_zero_allocate;
+
+  if (!rcutils_set_default_allocator(&freeRTOS_allocator)) {
+	 printf("Error on default allocators (line %d)\n", __LINE__);
+  }
+
+  // micro-ROS app
+
+  rcl_publisher_t publisher;
+  std_msgs__msg__Int32 msg;
+  rclc_support_t support;
+  rcl_allocator_t allocator;
+  rcl_node_t node;
+
+  allocator = rcl_get_default_allocator();
+
+  //create init_options
+  rclc_support_init(&support, 0, NULL, &allocator);
+
+  // create node
+  rclc_node_init_default(&node, "cubemx_node", "", &support);
+
+  // create publisher
+  rclc_publisher_init_default(
+    &publisher,
+    &node,
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
+    "cubemx_publisher");
+
+  msg.data = 0;
+
+  // TO print this enable FreeRTOS -> USE_STATS_FORMATTING_FUNCTIONS
+
+  // static char ptrTaskList[1000];
+
+  // vTaskList(ptrTaskList);
+  // printf("**********************************");
+  // printf("Task  State   Prio    Stack    Num");
+  // printf("**********************************");
+  // printf(ptrTaskList);
+  // printf("**********************************");
+
+
+  for(;;) {
+    (void)! rcl_publish(&publisher, &msg, NULL);
+    msg.data++;
+    osDelay(portTICK_RATE_MS*1000);
   }
   /* USER CODE END 5 */
 }
