@@ -45,7 +45,6 @@ private:
         RCLCPP_ERROR(this->get_logger(), "writing file not found!!");
         rclcpp::shutdown();
       }
-      writing_file.open(filename, std::ios::out);
       for (int i = 0; i < NUM_EVAL; i++)
       {
         const std::string writing_text = std::to_string(sublogs[i]) + "," + std::to_string(timelogs[i].nanoseconds());
