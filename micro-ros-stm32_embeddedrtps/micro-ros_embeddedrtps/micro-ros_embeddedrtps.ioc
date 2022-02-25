@@ -354,4 +354,4 @@ VP_SYS_VS_tim14.Mode=TIM14
 VP_SYS_VS_tim14.Signal=SYS_VS_tim14
 board=NUCLEO-F767ZI
 boardIOC=true
-isbadioc=true
+isbadioc=false

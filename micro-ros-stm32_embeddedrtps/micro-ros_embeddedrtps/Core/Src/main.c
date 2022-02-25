@@ -19,6 +19,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
+#include "lwip.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -41,12 +43,17 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-ETH_HandleTypeDef heth;
-
 UART_HandleTypeDef huart3;
 
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_size = 8000 * 4,
+  .priority = (osPriority_t) osPriorityBelowNormal3,
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -54,9 +61,10 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_ETH_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
+void StartDefaultTask(void *argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -94,13 +102,47 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_ETH_Init();
   MX_USART3_UART_Init();
   MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -171,53 +213,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief ETH Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_ETH_Init(void)
-{
-
-  /* USER CODE BEGIN ETH_Init 0 */
-
-  /* USER CODE END ETH_Init 0 */
-
-   static uint8_t MACAddr[6];
-
-  /* USER CODE BEGIN ETH_Init 1 */
-
-  /* USER CODE END ETH_Init 1 */
-  heth.Instance = ETH;
-  heth.Init.AutoNegotiation = ETH_AUTONEGOTIATION_ENABLE;
-  heth.Init.Speed = ETH_SPEED_100M;
-  heth.Init.DuplexMode = ETH_MODE_FULLDUPLEX;
-  heth.Init.PhyAddress = LAN8742A_PHY_ADDRESS;
-  MACAddr[0] = 0x00;
-  MACAddr[1] = 0x80;
-  MACAddr[2] = 0xE1;
-  MACAddr[3] = 0x00;
-  MACAddr[4] = 0x00;
-  MACAddr[5] = 0x00;
-  heth.Init.MACAddr = &MACAddr[0];
-  heth.Init.RxMode = ETH_RXPOLLING_MODE;
-  heth.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
-  heth.Init.MediaInterface = ETH_MEDIA_INTERFACE_RMII;
-
-  /* USER CODE BEGIN MACADDRESS */
-
-  /* USER CODE END MACADDRESS */
-
-  if (HAL_ETH_Init(&heth) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN ETH_Init 2 */
-
-  /* USER CODE END ETH_Init 2 */
-
 }
 
 /**
@@ -344,6 +339,47 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* init code for LWIP */
+  MX_LWIP_Init();
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END 5 */
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM14 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM14) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
