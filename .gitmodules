@@ -6,3 +6,7 @@
 	path = mros2-asp3-f767zi
 	url = git@github.com:mROS-base/mros2-asp3-f767zi
 	branch = eval/v0.3.1
+[submodule "micro-ros-stm32_embeddedrtps/micro-ros_embeddedrtps/micro_ros_stm32cubemx_utils"]
+	path = micro-ros-stm32_embeddedrtps/micro-ros_embeddedrtps/micro_ros_stm32cubemx_utils
+	url = https://github.com/mROS-base/micro_ros_stm32cubemx_utils
+	branch = galactic
