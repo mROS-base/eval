@@ -17,6 +17,9 @@ else
   PLATFORM=$1
 fi
 
+### create directory in `results/` ###
+mkdir -p results/${PLATFORM}
+
 ### run evaluation ###
 echo "INFO: all evaluation for \"${PLATFORM}\" start"
 

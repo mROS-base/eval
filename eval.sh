@@ -3,9 +3,8 @@
 function usage () {
   echo "ERROR: args invalid"
   echo "USAGE: eval.bash PLATFORM APP [LEN_STR]"
-  echo "  PLATFORM : \"asp3\", \"mbed\""
-  echo "  APP      : \"string\", \"uint16\", \"twist\""
   echo "  PLATFORM : \"uros-serial\" \"uros-udp\" \"uros-rtps\" \"mros2-asp3\" \"mros2-mbed\""
+  echo "  APP      : \"string\", \"uint16\", \"twist\""
 }
 
 ### setup operation ###
@@ -28,6 +27,9 @@ else
     fi
   fi
 fi
+
+### create directory in `results/` ###
+mkdir -p results/${PLATFORM}
 
 ### run evaluation ###
 echo "INFO: make sure \"${APP}\" with \"${PLATFORM}\" is ready to pub/sub on the board"
