@@ -11,7 +11,7 @@
 
 It's about the same as the official tutorial on micro-ROS website: https://micro.ros.org/docs/tutorials/core/first_application_rtos/freertos/
 
-### Building the evaluation app
+### Creating the workspace and building micro-ROS tools
 
 - [same] Installing ROS 2 and the micro-ROS build system
   ```
@@ -36,6 +36,11 @@ It's about the same as the official tutorial on micro-ROS website: https://micro
   colcon build
   source install/local_setup.bash
   ```
+
+### Building the evaluation app
+
+MEMO: This phase may be skipped on RPi4 (evaluation setup).
+
 - Creating a new firmware workspace
   - specify Platform to `nucleo_f767zi`
     ```
@@ -43,10 +48,11 @@ It's about the same as the official tutorial on micro-ROS website: https://micro
     ```
   - change remote url and branch of `freertos_apps`
     ```
-    cd firmware/microros_apps
+    cd firmware/freertos_apps
     git remote set-url origin https://github.com/mROS-base/freertos_apps
     git pull
     git checkout eval/galactic-fix-upd-nucleo-f767zi
+    cd ../..
     ```
 - Configuring the firmware
   - need to set [APP] according to the target (e.g., `eval_string`)
@@ -82,4 +88,3 @@ It's about the same as the official tutorial on micro-ROS website: https://micro
     ```
     ros2 run micro_ros_agent micro_ros_agent udp4 -p 8888
     ```
-  - 
