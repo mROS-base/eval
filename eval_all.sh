@@ -5,7 +5,7 @@ ARRAY_LEN_STR=(1 2 4 8 16 32 64)
 function usage () {
   echo "ERROR: args invalid"
   echo "USAGE: eval_all.bash PLATFORM"
-  echo "  PLATFORM : \"asp3\", \"mbed\""
+  echo "  PLATFORM : \"uros-serial\" \"uros-udp\" \"uros-rtps\" \"mros2-asp3\" \"mros2-mbed\""
 }
 
 ### setup operation ###

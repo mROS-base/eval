@@ -5,7 +5,7 @@ function usage () {
   echo "USAGE: eval.bash PLATFORM APP [LEN_STR]"
   echo "  PLATFORM : \"asp3\", \"mbed\""
   echo "  APP      : \"string\", \"uint16\", \"twist\""
-  echo "  [LEN_STR]: the length of \"string\""
+  echo "  PLATFORM : \"uros-serial\" \"uros-udp\" \"uros-rtps\" \"mros2-asp3\" \"mros2-mbed\""
 }
 
 ### setup operation ###

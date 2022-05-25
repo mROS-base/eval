@@ -19,9 +19,11 @@ It's about the same as the official tutorial on micro-ROS website: https://micro
   source /opt/ros/$ROS_DISTRO/setup.bash
 
   # Create a workspace and download the micro-ROS tools
-  mkdir microros_ws
-  cd microros_ws
+  cd <dir_of_this_repo>/uros-freertos
+  mkdir -p microros_ws/src
+  cd microros_ws/src
   git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup
+  cd ..
 
   # Update dependencies using rosdep
   sudo apt update && rosdep update
@@ -47,7 +49,7 @@ It's about the same as the official tutorial on micro-ROS website: https://micro
     git checkout eval/galactic-fix-upd-nucleo-f767zi
     ```
 - Configuring the firmware
-  - need to set [APP] according to the target
+  - need to set [APP] according to the target (e.g., `eval_string`)
   - for serial connection
     ```
     ros2 run micro_ros_setup configure_firmware.sh [APP] -t serial
@@ -61,6 +63,7 @@ It's about the same as the official tutorial on micro-ROS website: https://micro
   ros2 run micro_ros_setup build_firmware.sh
   ros2 run micro_ros_setup flash_firmware.sh
   ```
+  - adding `-f` to build_firmware.sh is useful to fast build
 
 ### Executing the evaluation app
 
