@@ -12,4 +12,5 @@
 	branch = galactic
 [submodule "mros2-posix"]
 	path = mros2-posix
-	url = git@github.com:mROS-base/mros2-posix.git
+	url = git@github.com:mROS-base/mros2-posix
+	branch = eval/v0.1.0
