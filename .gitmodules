@@ -10,3 +10,7 @@
 	path = micro-ros-stm32_embeddedrtps/micro-ros_embeddedrtps/micro_ros_stm32cubemx_utils
 	url = https://github.com/mROS-base/micro_ros_stm32cubemx_utils
 	branch = galactic
+[submodule "mros2-posix"]
+	path = mros2-posix
+	url = https://github.com/mROS-base/mros2-posix
+	branch = eval/v0.1.0
